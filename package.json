@@ -1,5 +1,8 @@
 {
   "name": "magneto_bank",
   "private": true,
-  "dependencies": {}
+  "dependencies": {},
+  "engines": {
+    "yarn": "1.10.1"
+  }
 }
