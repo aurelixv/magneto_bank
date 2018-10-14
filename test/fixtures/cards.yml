@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  card_type: false
+  card_number: 
+  verification_number: 
+  aquisition_date: 2018-10-14
+  due_date: 2018-10-14
+
+two:
+  card_type: false
+  card_number: 
+  verification_number: 
+  aquisition_date: 2018-10-14
+  due_date: 2018-10-14

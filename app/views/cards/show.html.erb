@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Card type:</strong>
+  <%= @card.card_type %>
+</p>
+
+<p>
+  <strong>Card number:</strong>
+  <%= @card.card_number %>
+</p>
+
+<p>
+  <strong>Verification number:</strong>
+  <%= @card.verification_number %>
+</p>
+
+<p>
+  <strong>Aquisition date:</strong>
+  <%= @card.aquisition_date %>
+</p>
+
+<p>
+  <strong>Due date:</strong>
+  <%= @card.due_date %>
+</p>
+
+<%= link_to 'Edit', edit_card_path(@card) %> |
+<%= link_to 'Back', cards_path %>

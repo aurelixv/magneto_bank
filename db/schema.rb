@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_14_204126) do
+ActiveRecord::Schema.define(version: 2018_10_14_214415) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -31,6 +31,38 @@ ActiveRecord::Schema.define(version: 2018_10_14_204126) do
     t.string "checksum", null: false
     t.datetime "created_at", null: false
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "cards", force: :cascade do |t|
+    t.boolean "card_type"
+    t.integer "card_number"
+    t.integer "verification_number"
+    t.date "aquisition_date"
+    t.date "due_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "client_id"
+  end
+
+  create_table "clients", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.string "address"
+    t.integer "zip_code"
+    t.string "password"
+    t.bigint "ssid"
+    t.date "birth_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "transactions", force: :cascade do |t|
+    t.string "transaction_type"
+    t.integer "value"
+    t.date "transaction_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "card_id"
   end
 
 end
