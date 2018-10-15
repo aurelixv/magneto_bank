@@ -74,22 +74,29 @@ last_card = Card.last.id
 
 client = 1
 10000.times do
-    client_cards = Client.where(id: client)[0].cards
+    client_cards = Client.where(id: client)[0].cards.length
+    transactions_per_card = 1200 / client_cards
+    current_client = Client.where(id: client)[0]
+    p 'Client: ' + current_client.id.to_s
 
-    year = 2013
-    5.times do
-        month = 1
-        12.times do
-            1200.times do
-                month == 2 ? days = 28 : days = 30
-                file.write(Faker::Commerce.department + "\t")
-                file.write(Faker::Commerce.price.to_s + "\t")
-                file.write(Date.new(year, month, rand(1..days)).to_s + "\t")
-                file.write(rand(first_card..last_card ).to_s + "\t\n")
+    current_client.cards.each do |card|
+        # = 2013
+        p '     Card: ' + card.id.to_s
+        5.times do
+            #month = 1
+            12.times do
+                transactions_per_card.times do
+                    month = rand(1..12)
+                    month == 2 ? days = 28 : days = 30
+                    file.write(Faker::Commerce.department + "\t")
+                    file.write(Faker::Commerce.price.to_s + "\t")
+                    file.write(Date.new(rand(2013..2017), month, rand(1..days)).to_s + "\t")
+                    file.write(card.id.to_s + "\t\n")
+                end
+                #month += 1
             end
-            month += 1
+            #year += 1
         end
-        year += 1
     end
     client += 1
 end
