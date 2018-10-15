@@ -8,6 +8,7 @@
 
 require 'faker'
 
+=begin 
 Client.delete_all
 Card.delete_all
 Transaction.delete_all
@@ -44,9 +45,6 @@ TOTAL_CLIENTS.times do
     count += 1
 end 
 
-
-Transaction.delete_all
-
 first_card = Card.first.id
 last_card = Card.last.id
 
@@ -67,4 +65,33 @@ year = 2013
     end
     year += 1
 end
-#
+=end
+
+file = File.open('teste', 'w')
+
+first_card = Card.first.id
+last_card = Card.last.id
+
+client = 1
+10000.times do
+    client_cards = Client.where(id: client)[0].cards
+
+    year = 2013
+    5.times do
+        month = 1
+        12.times do
+            1200.times do
+                month == 2 ? days = 28 : days = 30
+                file.write(Faker::Commerce.department + "\t")
+                file.write(Faker::Commerce.price.to_s + "\t")
+                file.write(Date.new(year, month, rand(1..days)).to_s + "\t")
+                file.write(rand(first_card..last_card ).to_s + "\t\n")
+            end
+            month += 1
+        end
+        year += 1
+    end
+    client += 1
+end
+
+file.close
