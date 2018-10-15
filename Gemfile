@@ -33,6 +33,8 @@ gem 'jbuilder', '~> 2.5'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
+gem 'activerecord'
+
 gem 'faker', :git => 'https://github.com/stympy/faker.git', :branch => 'master'
 
 # Reduces boot times through caching; required in config/boot.rb
@@ -40,7 +42,8 @@ gem 'bootsnap', '>= 1.1.0', require: false
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'sqlite3', '1.3.13'
+  #gem 'sqlite3', '1.3.13'
+  gem 'pg', '0.20.0'
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
 end
 

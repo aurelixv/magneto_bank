@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_14_214415) do
+ActiveRecord::Schema.define(version: 2018_10_15_004041) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -35,7 +35,7 @@ ActiveRecord::Schema.define(version: 2018_10_14_214415) do
 
   create_table "cards", force: :cascade do |t|
     t.boolean "card_type"
-    t.integer "card_number"
+    t.string "card_number"
     t.integer "verification_number"
     t.date "aquisition_date"
     t.date "due_date"
@@ -58,7 +58,7 @@ ActiveRecord::Schema.define(version: 2018_10_14_214415) do
 
   create_table "transactions", force: :cascade do |t|
     t.string "transaction_type"
-    t.integer "value"
+    t.float "value"
     t.date "transaction_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

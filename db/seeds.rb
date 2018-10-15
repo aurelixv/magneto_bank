@@ -12,8 +12,13 @@ Client.delete_all
 Card.delete_all
 Transaction.delete_all
 
-10000.times do
-    Client.create(
+TOTAL_CLIENTS = 10000
+TOTAL_CARDS = 3..5
+MONTHLY_TRANSACTIONS = 1200
+TOTAL_TRANSACTIONS = 5 * 12 * MONTHLY_TRANSACTIONS 
+
+TOTAL_CLIENTS.times do
+    Client.create!(
         name: Faker::Name.name_with_middle,
         email: Faker::Internet.unique.free_email,
         address: Faker::Address.street_address,
@@ -23,3 +28,43 @@ Transaction.delete_all
         birth_date: Faker::Date.birthday(20, 70)
     )
 end
+
+count = Client.first.id
+TOTAL_CLIENTS.times do
+    rand(3..5).times do
+        Card.create!(
+            card_type: Faker::Boolean.boolean,
+            card_number: Faker::Finance.unique.credit_card(:mastercard),
+            verification_number: Faker::Number.number(3),
+            aquisition_date: Faker::Date.birthday(5, 10),
+            due_date: Faker::Date.birthday(5, 10),
+            client_id: count
+        )
+    end
+    count += 1
+end 
+
+
+Transaction.delete_all
+
+first_card = Card.first.id
+last_card = Card.last.id
+
+year = 2013
+5.times do
+    month = 1
+    12.times do
+        1200.times do
+            month == 2 ? days = 28 : days = 30
+            Transaction.create!(
+                transaction_type: Faker::Commerce.department,
+                value: Faker::Commerce.price,
+                transaction_date: Date.new(year, month, rand(1..days)),
+                card_id: rand(first_card..last_card)
+            )
+        end
+        month += 1
+    end
+    year += 1
+end
+#
