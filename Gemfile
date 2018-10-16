@@ -37,6 +37,10 @@ gem 'activerecord'
 
 gem 'faker', :git => 'https://github.com/stympy/faker.git', :branch => 'master'
 
+gem 'parallel'
+
+gem 'ruby-progressbar'
+
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.1.0', require: false
 
