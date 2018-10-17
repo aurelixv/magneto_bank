@@ -9,18 +9,18 @@
 require 'faker'
 require 'parallel'
 
+TOTAL_CLIENTS = 10000
+TOTAL_CARDS = 3..5
+MONTHLY_TRANSACTIONS = 1200
+TOTAL_TRANSACTIONS = 5 * 12 * MONTHLY_TRANSACTIONS
+=begin
 Client.delete_all
 Card.delete_all
 Transaction.delete_all
 
-TOTAL_CLIENTS = 1000
-TOTAL_CARDS = 1..2
-MONTHLY_TRANSACTIONS = 200
-TOTAL_TRANSACTIONS = 5 * 12 * MONTHLY_TRANSACTIONS
-
 semaphore = Mutex.new
 
-Parallel.map(1..TOTAL_CLIENTS, progress: "Criando clientes...", in_threads: 3) do
+Parallel.map(1..TOTAL_CLIENTS, progress: "Criando #{TOTAL_CLIENTS} clientes...", in_threads: 3) do
     name = Faker::Name.name_with_middle
     email = Faker::Internet.unique.free_email
     address = Faker::Address.street_address
@@ -42,7 +42,7 @@ Parallel.map(1..TOTAL_CLIENTS, progress: "Criando clientes...", in_threads: 3) d
     }
 end
 
-Parallel.map(Client.first.id..Client.last.id, progress: "Criando cartões...", in_threads: 3) do |client|
+Parallel.map(Client.first.id..Client.last.id, progress: "Criando #{TOTAL_CARDS} cartões...", in_threads: 3) do |client|
     rand(TOTAL_CARDS).times do
         card_type = Faker::Boolean.boolean,
         card_number = Faker::Finance.unique.credit_card(:mastercard)
@@ -61,72 +61,61 @@ Parallel.map(Client.first.id..Client.last.id, progress: "Criando cartões...", i
             )
         }
     end
-end 
-
-=begin 
-first_card = Card.first.id
-last_card = Card.last.id
-
-year = 2013
-5.times do
-    month = 1
-    12.times do
-        1200.times do
-            month == 2 ? days = 28 : days = 30
-            Transaction.create!(
-                transaction_type: Faker::Commerce.department,
-                value: Faker::Commerce.price,
-                transaction_date: Date.new(year, month, rand(1..days)),
-                card_id: rand(first_card..last_card)
-            )
-        end
-        month += 1
-    end
-    year += 1
-end 
+end
 =end
-File.open('transactions.sql', 'w') {|f| f.puts 'COPY public.transactions (transaction_type, value, transaction_date, created_at, updated_at, card_id) FROM stdin;' + "\n"}
-file = File.open('transactions.sql', 'a')
-#file.write('COPY public.transactions (transaction_type, value, transaction_date, created_at, updated_at, card_id) FROM stdin;' + "\n")
-Parallel.map(Client.first.id..Client.last.id, progress: "Criando transacoes...", in_threads: 3) do |client|
-    client_cards = Client.where(id: client)[0].cards.length
-    transactions_per_card = MONTHLY_TRANSACTIONS / client_cards
-    current_client = Client.where(id: client)[0]
-    'Client: ' + current_client.id.to_s
-
-    Parallel.each(current_client.cards) do |card|
-        '     Card: ' + card.id.to_s
-
-        5.times do
-            12.times do
-                transactions_per_card.times do
-                    month = rand(1..12)
-                    month == 2 ? days = 28 : days = 30
-                    #string = Faker::Commerce.department + "\t" + Faker::Number.decimal(rand(2..3), 2).to_s + "\t" + Date.new(rand(2013..2017), month, rand(1..days)).to_s + "\t" + DateTime.now.to_s + "\t" + DateTime.now.to_s + "\t" + card.id.to_s + "\n"
-                    transaction_type = Faker::Commerce.department
-                    value = Faker::Number.decimal(rand(2..3), 2)
-                    transaction_date = Date.new(rand(2013..2017), month, rand(1..days))
-                    created_at = DateTime.now
-                    updated_at = DateTime.now
-                    card_id = card.id
-                    string = transaction_type.to_s + "\t" + value.to_s + "\t" + transaction_date.to_s + "\t" + created_at.to_s + "\t" + updated_at.to_s + "\t" + card_id.to_s + "\n" 
-                    semaphore.synchronize {
-                        file.write(string)
-=begin 
-                        Transaction.create!(
-                            transaction_type: transaction_type,
-                            value: value,
-                            transaction_date: transaction_date,
-                            card_id: card_id,
-                            created_at: created_at,
-                            updated_at: updated_at
-                        ) 
-=end
-                    }
+pool = []
+clients = Client.last.id.to_i - Client.first.id.to_i + 1
+increase = clients/5
+firstClient = Client.first.id.to_i
+lastClient = firstClient + increase
+pg_semaphore = Mutex.new
+for fileNum in 1..5
+    pool << Thread.new(fileNum, firstClient, lastClient) {
+        File.open("transactions#{fileNum}.sql", 'w') {|f| f.puts 'COPY public.transactions (transaction_type, value, transaction_date, created_at, updated_at, card_id) FROM stdin;' + "\n"}
+        file = File.open("transactions#{fileNum}.sql", 'a')
+        thread_semaphore = Mutex.new
+        for client in firstClient..lastClient
+            p 'Client: ' + client.to_s
+            current_client = 0
+            client_cards = 0
+            first_card = 0
+            last_card = 0
+            begin
+                pg_semaphore.synchronize {
+                    current_client = Client.where(id: client)[0]
+                    client_cards = Client.where(id: client)[0].cards.length
+                    first_card = Client.where(id: client)[0].cards.first.id
+                    last_card = Client.where(id: client)[0].cards.last.id
+                }
+                transactions_per_card = MONTHLY_TRANSACTIONS / client_cards
+                Parallel.each(first_card..last_card) do |card|
+                    5.times do
+                        12.times do
+                            transactions_per_card.times do
+                                month = rand(1..12)
+                                month == 2 ? days = 28 : days = 30
+                                transaction_type = Faker::Commerce.department
+                                value = Faker::Number.decimal(rand(2..3), 2)
+                                transaction_date = Date.new(rand(2013..2017), month, rand(1..days))
+                                created_at = DateTime.now
+                                updated_at = DateTime.now
+                                card_id = card
+                                string = transaction_type.to_s + "\t" + value.to_s + "\t" + transaction_date.to_s + "\t" + created_at.to_s + "\t" + updated_at.to_s + "\t" + card_id.to_s + "\n" 
+                                thread_semaphore.synchronize {
+                                    file.write(string)
+                                }
+                            end
+                        end
+                    end
                 end
+            rescue Exception => e
+                p 'Erro no postgresql'
             end
         end
-    end
+        file.close
+    }.run
+    sleep(1)
+    firstClient += increase
+    lastClient += increase
 end
-
-#file.close
+pool.each(&:join) 

@@ -24,7 +24,8 @@ development:
   adapter: postgresql
   encoding: unicode
   database: minha
-  pool: 5
+  pool: 100
+  port: 5432
   username: aurelio
   #password: password1
 
