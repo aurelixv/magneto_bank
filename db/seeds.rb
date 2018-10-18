@@ -1,26 +1,18 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
-
 require 'faker'
 require 'parallel'
 
-TOTAL_CLIENTS = 10000
-TOTAL_CARDS = 3..5
-MONTHLY_TRANSACTIONS = 1200
+TOTAL_CLIENTS = 1000
+TOTAL_CARDS = 1..2
+MONTHLY_TRANSACTIONS = 200
 TOTAL_TRANSACTIONS = 5 * 12 * MONTHLY_TRANSACTIONS
-=begin
+
 Client.delete_all
 Card.delete_all
 Transaction.delete_all
 
-semaphore = Mutex.new
+db_semaphore = Mutex.new
 
-Parallel.map(1..TOTAL_CLIENTS, progress: "Criando #{TOTAL_CLIENTS} clientes...", in_threads: 3) do
+Parallel.map(1..TOTAL_CLIENTS, progress: "Criando #{TOTAL_CLIENTS} clientes\t", in_threads: 3) do
     name = Faker::Name.name_with_middle
     email = Faker::Internet.unique.free_email
     address = Faker::Address.street_address
@@ -29,7 +21,7 @@ Parallel.map(1..TOTAL_CLIENTS, progress: "Criando #{TOTAL_CLIENTS} clientes...",
     ssid = Faker::Number.number(11)
     birth_date = Faker::Date.birthday(20, 70)
 
-    semaphore.synchronize {
+    db_semaphore.synchronize {
         Client.create!(
             name: name,
             email: email,
@@ -42,7 +34,7 @@ Parallel.map(1..TOTAL_CLIENTS, progress: "Criando #{TOTAL_CLIENTS} clientes...",
     }
 end
 
-Parallel.map(Client.first.id..Client.last.id, progress: "Criando #{TOTAL_CARDS} cartões...", in_threads: 3) do |client|
+Parallel.map(Client.first.id..Client.last.id, progress: "Criando #{TOTAL_CARDS} cartões\t", in_threads: 3) do |client|
     rand(TOTAL_CARDS).times do
         card_type = Faker::Boolean.boolean,
         card_number = Faker::Finance.unique.credit_card(:mastercard)
@@ -50,7 +42,7 @@ Parallel.map(Client.first.id..Client.last.id, progress: "Criando #{TOTAL_CARDS} 
         aquisition_date = Faker::Date.birthday(5, 10)
         due_date = Faker::Date.birthday(5, 10)
         client_id = client
-        semaphore.synchronize {
+        db_semaphore.synchronize {
             Card.create!(
                 card_type: card_type,
                 card_number: card_number,
@@ -62,26 +54,46 @@ Parallel.map(Client.first.id..Client.last.id, progress: "Criando #{TOTAL_CARDS} 
         }
     end
 end
-=end
+
+FAKE_VALUES = 10_000
+faker = {
+    transaction_type: [],
+    value: []
+}
+
+print "Gerando dicionário de dados aleatórios... "
+(FAKE_VALUES + 1).times do
+    faker[:transaction_type] << Faker::Commerce.department
+    faker[:value] << Faker::Number.decimal(rand(2..3), 2)
+end
+puts "OK"
+
 pool = []
 clients = Client.last.id.to_i - Client.first.id.to_i + 1
 increase = clients/5
 firstClient = Client.first.id.to_i
-lastClient = firstClient + increase
-pg_semaphore = Mutex.new
+lastClient = firstClient + increase - 1
+today = DateTime.now
+
+progress_bar = ProgressBar.create(
+    format: "%t | %a %e %P% Cliente: %c de %C",
+    title: "Criando transações\t",
+    total: TOTAL_CLIENTS
+)
+
+#TODO One pg connection per thread
 for fileNum in 1..5
     pool << Thread.new(fileNum, firstClient, lastClient) {
-        File.open("transactions#{fileNum}.sql", 'w') {|f| f.puts 'COPY public.transactions (transaction_type, value, transaction_date, created_at, updated_at, card_id) FROM stdin;' + "\n"}
-        file = File.open("transactions#{fileNum}.sql", 'a')
+        File.open("results/transactions#{fileNum}.sql", 'w') {|f| f.puts 'COPY public.transactions (transaction_type, value, transaction_date, created_at, updated_at, card_id) FROM stdin;' + "\n"}
+        file = File.open("results/transactions#{fileNum}.sql", 'a')
         thread_semaphore = Mutex.new
         for client in firstClient..lastClient
-            p 'Client: ' + client.to_s
             current_client = 0
             client_cards = 0
             first_card = 0
             last_card = 0
             begin
-                pg_semaphore.synchronize {
+                db_semaphore.synchronize {
                     current_client = Client.where(id: client)[0]
                     client_cards = Client.where(id: client)[0].cards.length
                     first_card = Client.where(id: client)[0].cards.first.id
@@ -89,16 +101,15 @@ for fileNum in 1..5
                 }
                 transactions_per_card = MONTHLY_TRANSACTIONS / client_cards
                 Parallel.each(first_card..last_card) do |card|
-                    5.times do
-                        12.times do
+                    for year in 1..5 do
+                        for month in 1..12 do
                             transactions_per_card.times do
-                                month = rand(1..12)
                                 month == 2 ? days = 28 : days = 30
-                                transaction_type = Faker::Commerce.department
-                                value = Faker::Number.decimal(rand(2..3), 2)
-                                transaction_date = Date.new(rand(2013..2017), month, rand(1..days))
-                                created_at = DateTime.now
-                                updated_at = DateTime.now
+                                transaction_type = faker[:transaction_type][rand(0..FAKE_VALUES)]
+                                value = faker[:value][rand(0..FAKE_VALUES)]
+                                transaction_date = Date.new(year, month, rand(1..days))
+                                created_at = today
+                                updated_at = today
                                 card_id = card
                                 string = transaction_type.to_s + "\t" + value.to_s + "\t" + transaction_date.to_s + "\t" + created_at.to_s + "\t" + updated_at.to_s + "\t" + card_id.to_s + "\n" 
                                 thread_semaphore.synchronize {
@@ -109,8 +120,10 @@ for fileNum in 1..5
                     end
                 end
             rescue Exception => e
-                p 'Erro no postgresql'
+                puts "Erro no postgresql"
+                sleep(5)
             end
+            progress_bar.increment
         end
         file.close
     }.run
@@ -118,4 +131,13 @@ for fileNum in 1..5
     firstClient += increase
     lastClient += increase
 end
-pool.each(&:join) 
+pool.each(&:join)
+
+puts "Inserindo no banco de dados..."
+for i in 1..5
+    puts "Arquivo #{i}..."
+    system("psql -d minha -c \"\\i 'results/transactions#{i}.sql'\"")
+    puts "OK"
+end
+
+puts "Script finalizado com sucesso!"
