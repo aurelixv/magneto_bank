@@ -23,7 +23,7 @@
 development:
   adapter: postgresql
   encoding: unicode
-  database: minha
+  database: magneto_bank
   pool: 100
   port: 5432
   username: aurelio
