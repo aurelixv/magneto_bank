@@ -2,3 +2,4 @@ log/*
 tmp/*
 results/*
 script.rb
+db/*

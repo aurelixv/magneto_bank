@@ -26,7 +26,7 @@ development:
   database: magneto_bank
   pool: 100
   port: 5432
-  username: aurelio
+  username: avk
   #password: password1
 
 production:
