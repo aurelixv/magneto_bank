@@ -10,6 +10,6 @@ class SaldoMensal
     def all
         transactions
             .where(card_id: PARAM)
-            .where("MONTH(YEAR FROM transaction_date) BETWEEN PARAM AND PARAM")
+            .where("EXTRACT(MONTH FROM transaction_date) BETWEEN PARAM AND PARAM")
     end
 end
