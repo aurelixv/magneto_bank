@@ -2,4 +2,4 @@ log/*
 tmp/*
 results/*
 script.rb
-db/*
+config/database.yml
