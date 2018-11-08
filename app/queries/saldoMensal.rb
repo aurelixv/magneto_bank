@@ -3,7 +3,7 @@ class SaldoMensal
         @transactions = transactions
     end
 
-    def init_values(values = transactions.("value"))
+    def init_values(values = transactions.sum("value"))
         @values = values
     end
 
