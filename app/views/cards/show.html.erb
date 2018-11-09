@@ -25,5 +25,18 @@
   <%= @card.due_date %>
 </p>
 
+<p>
+  <form class="" action="/report" method="post">
+    <strong>Day:</strong>
+    <%= select_tag 'day', options_for_select(1..31) %>
+    <strong>Month:</strong>
+    <%= select_tag 'month', options_for_select(1..12) %>
+    <strong>Year:</strong>
+    <%= select_tag 'year', options_for_select(2013..2018) %>
+    <input type="number" name="card" value="<%= @card.id %>" hidden="true">
+    <input type="submit" name="search" value="Search">
+  </form>
+</p>
+
 <%= link_to 'Edit', edit_card_path(@card) %> |
 <%= link_to 'Back', cards_path %>

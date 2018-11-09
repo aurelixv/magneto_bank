@@ -35,5 +35,26 @@
   <%= @client.birth_date %>
 </p>
 
-<%= link_to 'Edit', edit_client_path(@client) %> |
-<%= link_to 'Back', clients_path %>
+<p>
+  <strong>Cards:</strong>
+  <%= @client.cards.count %>
+  <p>
+  <% @client.cards.each do |card| %>
+    <li>
+      <a href="/cards/<%= card.id %>">
+        <%= card.card_number %>
+      </a>
+    </li>
+  <% end %>
+  </p>
+</p>
+
+<p>
+  <%= link_to 'Edit', edit_client_path(@client) %> |
+  <%= link_to 'Back', clients_path %>
+</p>
+
+<p>
+  <a href="<%= @client.id - 1 if @client.id > Client.first.id %>"> Prev </a> |
+  <a href="<%= @client.id + 1 if @client.id < Client.last.id %>"> Next </a>
+</p>

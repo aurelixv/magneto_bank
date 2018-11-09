@@ -1,0 +1,15 @@
+<% extrato = 0 %>
+
+<% @transactions.each do |transaction| %>
+  <li>
+    <strong>ID:</strong>
+    <a href="/transactions/<%= transaction.id %>}"><%= transaction.id %></a>
+    <strong>Valor:</strong>
+    <% valor = transaction.is_debt ? -1 * transaction.value : transaction.value %>
+    <% extrato += valor %>
+    <%= valor %>
+    <strong>Data:</strong>
+    <%= transaction.transaction_date %>
+  </li>
+<% end %>
+<h1><%= extrato.round(2) %></h1>

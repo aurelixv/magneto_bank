@@ -1,4 +1,5 @@
 class CardsController < ApplicationController
+  skip_before_action :verify_authenticity_token
   before_action :set_card, only: %i[show edit update destroy]
 
   # GET /cards
@@ -59,6 +60,10 @@ class CardsController < ApplicationController
     end
   end
 
+  def report
+    @transactions = Card.find(params[:card]).transactions.where("EXTRACT(YEAR FROM transaction_date) BETWEEN #{params[:year]} AND 2018")
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.
@@ -68,6 +73,6 @@ class CardsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def card_params
-    params.require(:card).permit(:card_type, :card_number, :verification_number, :aquisition_date, :due_date)
+    params.require(:card).permit(:card_type, :card_number, :verification_number, :aquisition_date, :due_date, :day, :month, :year)
   end
 end

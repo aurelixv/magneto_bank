@@ -4,7 +4,7 @@ class TransactionsController < ApplicationController
   # GET /transactions
   # GET /transactions.json
   def index
-    @transactions = SaldoAnual.sum_condition(Transaction.all, 2011, 2013, true) - SaldoAnual.sum_condition(Transaction.all, 2011, 2013, false)
+    render :json => SaldoAnual.sum_condition(Transaction.all, 2011, 2013, true) - SaldoAnual.sum_condition(Transaction.all, 2011, 2013, false)
   end
 
   # GET /transactions/1

@@ -9,7 +9,9 @@ class ClientsController < ApplicationController
 
   # GET /clients/1
   # GET /clients/1.json
-  def show; end
+  def show
+    
+  end
 
   # GET /clients/new
   def new
