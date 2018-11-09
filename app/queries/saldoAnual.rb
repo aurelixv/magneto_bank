@@ -1,15 +1,9 @@
 class SaldoAnual
-    def initialize(transactions = Transaction.all)
-        @transactions = transactions
-    end
-
-    def init_values(values = transactions.sum("value"))
-        @values = values
-    end
-
-    def all
+    def sum_condition transactions, card, year, is_debt
         transactions
-            .where(card_id: PARAM) 
-            .where("EXTRACT(YEAR FROM transaction_date) BETWEEN PARAM AND PARAM")
+            .where(card_id: card)
+            .where("EXTRACT(YEAR FROM transaction_date) BETWEEN 2013 AND #{year}")
+            .where(is_debt: is_debt)
+            .sum("value")
     end
 end

@@ -39,7 +39,7 @@ end
 Parallel.map(Client.first.id..Client.last.id, progress: "Criando #{TOTAL_CARDS} cartões", in_threads: 3) do |client|
   rand(TOTAL_CARDS).times do
     card_type = Faker::Boolean.boolean,
-                card_number = Faker::Finance.unique.credit_card(:mastercard)
+    card_number = Faker::Finance.unique.credit_card(:mastercard)
     verification_number = Faker::Number.number(3)
     aquisition_date = Faker::Date.birthday(5, 10)
     # due_date = Faker::Date.birthday(5, 10)
@@ -86,7 +86,7 @@ progress_bar = ProgressBar.create(
 # TODO: One pg connection per thread
 (1..5).each do |fileNum|
   pool << Thread.new(fileNum, firstClient, lastClient) do
-    File.open("results/transactions#{fileNum}.sql", 'w') { |f| f.puts 'COPY public.transactions (transaction_type, value, transaction_date, created_at, updated_at, card_id) FROM stdin;' + "\n" }
+    File.open("results/transactions#{fileNum}.sql", 'w') { |f| f.puts 'COPY public.transactions (transaction_type, value, transaction_date, created_at, updated_at, card_id, is_debt) FROM stdin;' + "\n" }
     file = File.open("results/transactions#{fileNum}.sql", 'a')
     thread_semaphore = Mutex.new
     (firstClient..lastClient).each do |client|
@@ -110,7 +110,13 @@ progress_bar = ProgressBar.create(
                 value = faker[:value][rand(0..FAKE_VALUES)]
                 transaction_date = Date.new(year, month, rand(1..days)).to_s
                 card_id = card.id.to_s
-                string = transaction_type + "\t" + value + "\t" + transaction_date + "\t" + today + "\t" + today + "\t" + card_id + "\n"
+                is_debt = rand(0..1)
+                if is_debt > 0.25
+                  is_debt = true
+                else
+                  is_debt = false
+                end
+                string = transaction_type + "\t" + value + "\t" + transaction_date + "\t" + today + "\t" + today + "\t" + card_id + "\t" + is_debt + "\n"
                 thread_semaphore.synchronize do
                   file.write(string)
                 end
