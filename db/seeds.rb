@@ -110,11 +110,9 @@ progress_bar = ProgressBar.create(
                 value = faker[:value][rand(0..FAKE_VALUES)]
                 transaction_date = Date.new(year, month, rand(1..days)).to_s
                 card_id = card.id.to_s
-                is_debt = rand(0..1)
-                if is_debt > 0.25
-                  is_debt = true
-                else
-                  is_debt = false
+                is_debt = false.to_s
+                if rand(0..100) > 25
+                  is_debt = true.to_s
                 end
                 string = transaction_type + "\t" + value + "\t" + transaction_date + "\t" + today + "\t" + today + "\t" + card_id + "\t" + is_debt + "\n"
                 thread_semaphore.synchronize do
