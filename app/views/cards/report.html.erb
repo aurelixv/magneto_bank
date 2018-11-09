@@ -1,5 +1,9 @@
 <% extrato = 0 %>
 
+<h1>
+  Cartao: <strong><%= @transactions.first.card.card_number %></strong>
+</h1>
+
 <% @transactions.each do |transaction| %>
   <li>
     <strong>ID:</strong>
@@ -7,9 +11,21 @@
     <strong>Valor:</strong>
     <% valor = transaction.is_debt ? -1 * transaction.value : transaction.value %>
     <% extrato += valor %>
-    <%= valor %>
+    <% if valor < 0 %>
+      <font color="red"><%= valor %></font>
+    <% else %>
+      <font color="green"><%= valor %></font>
+    <% end %>
     <strong>Data:</strong>
     <%= transaction.transaction_date %>
   </li>
 <% end %>
-<h1><%= extrato.round(2) %></h1>
+<h1>
+  Extrato:
+  <% if extrato > 0 %>
+    <font color="green"><%= extrato.round(2) %></font>
+  <% else %>
+    <font color="red"><%= extrato.round(2) %></font>
+  <% end %>
+</h1>
+<a href="/cards/<%= @transactions.first.card.id %>">Back</a>

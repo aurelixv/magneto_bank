@@ -2,11 +2,11 @@ require 'faker'
 require 'parallel'
 require 'ruby-progressbar'
 
-TOTAL_CLIENTS = 1000
+TOTAL_CLIENTS = 100
 TOTAL_CARDS = 3..5
 MONTHLY_TRANSACTIONS = 1200
 TOTAL_TRANSACTIONS = 5 * 12 * MONTHLY_TRANSACTIONS
-DATABASE = 'magneto_bank'.freeze
+DATABASE = 'magneto'.freeze
 
 Client.delete_all
 Card.delete_all

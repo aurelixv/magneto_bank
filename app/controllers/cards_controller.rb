@@ -61,7 +61,7 @@ class CardsController < ApplicationController
   end
 
   def report
-    @transactions = Card.find(params[:card]).transactions.where("EXTRACT(YEAR FROM transaction_date) BETWEEN #{params[:year]} AND 2018")
+    @transactions = Card.find(params[:card]).transactions.where("transaction_date >= '#{params[:year]}-#{params[:month]}-#{params[:day]}' AND transaction_date < '#{params[:year_final]}-#{params[:month_final]}-#{params[:day_final]}'").order(:transaction_date)
   end
 
   private
