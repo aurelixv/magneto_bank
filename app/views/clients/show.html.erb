@@ -36,6 +36,16 @@
 </p>
 
 <p>
+  <% if @client.balance < 0 %>
+    <strong>Saldo:</strong>
+    <font color="red"><%= @client.balance.round(2) %></font>
+  <% else %>
+    <strong>Saldo:</strong>
+    <font color="green"><%= @client.balance.round(2) %></font>
+  <% end %>
+</p>
+
+<p>
   <strong>Cards:</strong>
   <%= @client.cards.count %>
   <p>
@@ -44,6 +54,13 @@
       <a href="/cards/<%= card.id %>">
         <%= card.card_number %>
       </a>
+      <% if card.balance < 0 %>
+        <strong>Saldo:</strong>
+        <font color="red"><%= card.balance.round(2) %></font>
+      <% else %>
+        <strong>Saldo:</strong>
+        <font color="green"><%= card.balance.round(2) %></font>
+      <% end %>
     </li>
   <% end %>
   </p>

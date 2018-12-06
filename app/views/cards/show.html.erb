@@ -1,11 +1,6 @@
 <p id="notice"><%= notice %></p>
 
 <p>
-  <strong>Card type:</strong>
-  <%= @card.card_type %>
-</p>
-
-<p>
   <strong>Card number:</strong>
   <%= @card.card_number %>
 </p>
@@ -23,6 +18,16 @@
 <p>
   <strong>Due date:</strong>
   <%= @card.due_date %>
+</p>
+
+<p>
+  <% if @card.balance < 0 %>
+    <strong>Saldo:</strong>
+    <font color="red"><%= @card.balance.round(2) %></font>
+  <% else %>
+    <strong>Saldo:</strong>
+    <font color="green"><%= @card.balance.round(2) %></font>
+  <% end %>
 </p>
 
   <form class="" action="/report" method="post">

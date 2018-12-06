@@ -2,11 +2,11 @@ require 'faker'
 require 'parallel'
 require 'ruby-progressbar'
 
-TOTAL_CLIENTS = 100
+TOTAL_CLIENTS = 10_000
 TOTAL_CARDS = 3..5
 MONTHLY_TRANSACTIONS = 1200
 TOTAL_TRANSACTIONS = 5 * 12 * MONTHLY_TRANSACTIONS
-DATABASE = 'magneto'.freeze
+DATABASE = 'magneto_bank'.freeze
 
 Client.delete_all
 Card.delete_all
@@ -90,6 +90,7 @@ progress_bar = ProgressBar.create(
     file = File.open("results/transactions#{fileNum}.sql", 'a')
     thread_semaphore = Mutex.new
     (firstClient..lastClient).each do |client|
+      client_balance = 0
       current_client = 0
       client_cards = 0
       cards = 0
@@ -102,6 +103,7 @@ progress_bar = ProgressBar.create(
         transactions_per_card = MONTHLY_TRANSACTIONS / client_cards
         # Parallel.each(cards) do |card|
         cards.each do |card|
+          card_balance = 0
           (2013..2017).each do |year|
             (1..12).each do |month|
               transactions_per_card.times do
@@ -111,8 +113,11 @@ progress_bar = ProgressBar.create(
                 transaction_date = Date.new(year, month, rand(1..days)).to_s
                 card_id = card.id.to_s
                 is_debt = false.to_s
-                if rand(0..100) > 25
+                if rand(0..100) > 50
                   is_debt = true.to_s
+                  card_balance -= value.to_f
+                else
+                  card_balance += value.to_f
                 end
                 string = transaction_type + "\t" + value + "\t" + transaction_date + "\t" + today + "\t" + today + "\t" + card_id + "\t" + is_debt + "\n"
                 thread_semaphore.synchronize do
@@ -121,12 +126,18 @@ progress_bar = ProgressBar.create(
               end
             end
           end
+          card.balance = card_balance
+          card.save
+          client_balance += card_balance
         end
+
       rescue Exception => e
         puts 'ERRO'
         puts e
         sleep(5)
       end
+      current_client.balance = client_balance
+      current_client.save
       progress_bar.increment
     end
     file.close
