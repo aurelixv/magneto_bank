@@ -1,6 +1,7 @@
 class ImgSignalsController < ApplicationController
   before_action :set_img_signal, only: [:show, :edit, :update, :destroy]
   skip_before_action :verify_authenticity_token
+  after_action :purge_attachment, only: :create
 
   # GET /img_signals
   # GET /img_signals.json
@@ -22,6 +23,10 @@ class ImgSignalsController < ApplicationController
   def edit
   end
 
+  def purge_attachment
+    @img_signal.file.purge
+  end
+
   # POST /img_signals
   # POST /img_signals.json
   def create
@@ -29,7 +34,6 @@ class ImgSignalsController < ApplicationController
     @img_signal.file.attach(params[:file])
     @img_signal.save
 
-    p '#'*200
     system("python3 script.py #{@img_signal.file_on_disk}")
 
     respond_to do |format|

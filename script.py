@@ -37,7 +37,7 @@ for i in range (15):
 
 f.resize(width, height)
 
-filename = str(time.time()) + ".png"
+filename = str(time.clock()) + ".png"
 cv2.normalize(f, f, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
 cv2.imwrite("./public/" + filename, f)
 

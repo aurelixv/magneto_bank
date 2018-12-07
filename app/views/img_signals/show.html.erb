@@ -9,11 +9,8 @@ File.open("logg", "r") do |f|
 end
 %>
 
-<%p "#"*200
-    p file.gsub("\n",'')
-%>
-
-<img width="350" height="350" src="<%= file %>">
-
+<img width="350" height="350" src="<%= "/#{file.gsub("\n",'')}" %>">
+<br>
+<br>
 <%= link_to 'Edit', edit_img_signal_path(@img_signal) %> |
 <%= link_to 'Back', img_signals_path %>

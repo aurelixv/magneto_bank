@@ -1,10 +1,12 @@
 class ClientsController < ApplicationController
   before_action :set_client, only: %i[show edit update destroy]
+  skip_before_action :verify_authenticity_token  
+
 
   # GET /clients
   # GET /clients.json
   def index
-    @clients = Client.all
+    @clients = Client.all.order(:id).limit(100)
   end
 
   # GET /clients/1
@@ -51,6 +53,10 @@ class ClientsController < ApplicationController
     end
   end
 
+  def search_client
+    @client = Client.find(params[:id])
+  end
+
   # DELETE /clients/1
   # DELETE /clients/1.json
   def destroy
@@ -70,6 +76,6 @@ class ClientsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def client_params
-    params.require(:client).permit(:name, :email, :address, :zip_code, :password, :ssid, :birth_date)
+    params.require(:client).permit(:name, :email, :address, :zip_code, :password, :ssid, :birth_date, :client_number)
   end
 end
