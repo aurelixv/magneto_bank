@@ -1,0 +1,12 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Imagens</h1>
+
+<% @files.each do |file| %>
+  <img width="350" height="350" src="<%= file.slice((file.index('/')..file.length)) %>">
+<% end %>
+
+<br>
+<br>
+
+<%= link_to 'New Img Signal', new_img_signal_path %>

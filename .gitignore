@@ -3,3 +3,9 @@ tmp/*
 results/*
 script.rb
 config/database.yml
+public/*.png
+storage/*
+.vscode
+H-1*
+np-H-1*
+g-1*

@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :img_signals
   resources :transactions
   resources :cards
   resources :clients

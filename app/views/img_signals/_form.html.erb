@@ -1,0 +1,11 @@
+<%= form_with(model: img_signal, local: true) do |form| %>
+
+  <form action="/img_signals" method="post">
+    <p>
+      <strong>g</strong><input type="file" name="file" accept="txt/*">
+    </p>
+    
+    <input type="submit">
+  </form>
+
+<% end %>
